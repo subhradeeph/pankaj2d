@@ -1,3 +1,23 @@
+# Latex intermediates
+*log
+*aux
+*dvi
+*lof
+*lot
+*bit
+*idx
+*glo
+*bbl
+*bcf
+*ilg
+*toc
+*ind
+*out
+*blg
+*fdb_latexmk
+*fls
+*pdf
+
 # Prerequisites
 *.d
 
