@@ -1,16 +1,16 @@
-nx 512
-ny 512
-dx 0.5
-dy 0.5
-dt 0.2
-numsteps 10000
+nx 1024
+ny 1024
+dx 1.0
+dy 1.0
+dt 1.0
+numsteps 50000
 print_steps 1000
 A 1.0 B 5.0 chi 0.0 P 1.0
 c_alpha 0.5 c_beta1 0.3 c_beta2 0.7
 kappa_c 2.0 
 kappa_phi 1.0 
 mobility 5.0
-relax_coeff 0.0000001
+relax_coeff 0.00001
 noise_level 0.001
 initflag 0
 initcount 0

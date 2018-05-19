@@ -5,14 +5,14 @@ void Output_Conf (int steps)
  
  char fn[100];
 
- sprintf (fn, "conf.%06d", steps);
+ sprintf (fn, "conf.%06d", steps + 20000);
 
  fpt = fopen (fn, "w");
  fwrite (&dfdc[0], sizeof(double), 2 * nx * ny, fpt);
  fwrite (&dfdphi[0], sizeof(double), 2 * nx * ny, fpt);
  fclose (fpt);
 
- sprintf (fn, "prof_gp.%06d", steps);
+ sprintf (fn, "prof_gp.%06d", steps + 20000);
  fpt = fopen (fn, "w");
 /*
 double *a;
