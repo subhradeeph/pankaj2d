@@ -22,6 +22,8 @@ void Evolve ()
 
   double err, maxerror;
   
+  double sum, mean;
+
   fftw_complex *gradphi_x, *gradphi_y, *gradmu_x, *gradmu_y;
 
   tempreal = (double *) malloc (sizeof (double) * nx * ny);
@@ -184,6 +186,19 @@ void Evolve ()
    gradphi[j + i *ny] = sqrt(creal(gradphi_x[j+i*ny]) *creal(gradphi_x[j+i*ny]) + creal(gradphi_y[j+i*ny]) * creal(gradphi_y[j+i*ny]));
     }
   }
+
+  sum = 0.0;
+
+ if (count % 1000 == 0){
+   for (int i = 0; i < nx; i++) {
+     for (int j = 0; j < ny; j++) {
+         sum += creal(dfdphi[j+i*ny]);
+     }
+   }
+ 
+   mean = sum * one_by_nxny;
+   printf("mean = %e\n", mean);
+ }
 
 /* Check for bounds */
  for (int i = 0; i < nx; i++) {
