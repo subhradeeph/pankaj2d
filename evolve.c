@@ -27,8 +27,8 @@ void Evolve ()
   tempreal = (double *) malloc (sizeof (double) * nx * ny);
   gradphi_x =(fftw_complex*) fftw_malloc(sizeof (fftw_complex) * nx * ny);
   gradphi_y = (fftw_complex*) fftw_malloc(sizeof (fftw_complex) * nx * ny);
-  gradmu_x = (fftw_complex*) fftw_malloc(sizeof (fftw_complex) * nx * ny);
-  gradmu_y = (fftw_complex*) fftw_malloc(sizeof (fftw_complex) * nx * ny);
+//  gradmu_x = (fftw_complex*) fftw_malloc(sizeof (fftw_complex) * nx * ny);
+//  gradmu_y = (fftw_complex*) fftw_malloc(sizeof (fftw_complex) * nx * ny);
 
   dkx = 2.0 * PI / ((double) nx * dx);
   dky = 2.0 * PI / ((double) ny * dy);
@@ -125,10 +125,10 @@ void Evolve ()
       kpow2 = kx + ky;
       kpow4 = kpow2 * kpow2;
       
-      mu[j + i * ny] = dfdc[j + i * ny] + 2.0 * kappa_c * kpow2 * comp[j + i * ny];
+  /*    mu[j + i * ny] = dfdc[j + i * ny] + 2.0 * kappa_c * kpow2 * comp[j + i * ny];
       gradmu_x[j + i * ny] = I * ax * mu[j + i * ny];
       gradmu_y[j + i * ny] = I * ay * mu[j + i * ny];
-
+  */
       lhs = 1.0 + 2.0 * mobility * kappa_c * kpow4 * dt;
 
       rhs = comp[j + i * ny] - mobility * kpow2 * dt * dfdc[j + i * ny]; 
@@ -158,8 +158,8 @@ void Evolve ()
 
     fftw_execute_dft (p_dn, gradphi_x, gradphi_x);
     fftw_execute_dft (p_dn, gradphi_y, gradphi_y);
-    fftw_execute_dft (p_dn, gradmu_x, gradmu_x);
-    fftw_execute_dft (p_dn, gradmu_y, gradmu_y);
+    //fftw_execute_dft (p_dn, gradmu_x, gradmu_x);
+    //fftw_execute_dft (p_dn, gradmu_y, gradmu_y);
 
   for (int i = 0; i < nx; i++) {
     for (int j = 0; j < ny; j++) {
@@ -169,9 +169,10 @@ void Evolve ()
       gradphi_x[j + i * ny] *= one_by_nxny;
       gradphi_y[j + i * ny] *= one_by_nxny;
      
-      gradmu_x[j + i * ny] *= one_by_nxny;
+      /*gradmu_x[j + i * ny] *= one_by_nxny;
       gradmu_y[j + i * ny] *= one_by_nxny;
    gradmu[j + i *ny] = sqrt(creal(gradmu_x[j+i*ny]) * creal(gradmu_x[j+i*ny]) + creal(gradmu_y[j+i*ny]) * creal(gradmu_y[j+i*ny]) );
+   */
    gradphi[j + i *ny] = sqrt(creal(gradphi_x[j+i*ny]) *creal(gradphi_x[j+i*ny]) + creal(gradphi_y[j+i*ny]) * creal(gradphi_y[j+i*ny]));
     }
   }
