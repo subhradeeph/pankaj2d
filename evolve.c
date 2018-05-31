@@ -63,6 +63,7 @@ void Evolve ()
   double ptemp;
   double hphi, gphi, hprime, gprime;
 
+  double gamma = 0.0;
 // Evaluate dfdc in real space
  for (int i = 0; i < nx; i++) {
    for (int j = 0; j < ny; j++) {
@@ -92,8 +93,15 @@ void Evolve ()
 
   dfdphi[j + i * ny] = -1.0 * hprime * A * (ctemp - c_alpha) * (ctemp - c_alpha) + hprime * B * (ctemp - c_beta1) 
 	  * (ctemp - c_beta1) * (ctemp - c_beta2) * (ctemp - c_beta2) + (1.0 - chi * ctemp) * P * gprime + _Complex_I * 0.0;
-      }
+     
+        gamma += dfdphi[j + i * ny];
+    
+     }
     }
+    gamma = gamma * one_by_nxny;
+
+    if (count % print_steps == 0)
+       printf("gamma %e\n",gamma);
 
     fftw_execute_dft (p_up, dfdc, dfdc);
     fftw_execute_dft (p_up, dfdphi, dfdphi);
@@ -137,7 +145,7 @@ void Evolve ()
 
       lhse = 1.0 + 2.0 * relax_coeff * kappa_phi * kpow2 * dt;
 
-      rhse = phi[j + i * ny] - relax_coeff * dt * dfdphi[j + i * ny];
+      rhse = phi[j + i * ny] - relax_coeff * dt * dfdphi[j + i * ny] + relax_coeff * gamma * dt;
       phi[j + i * ny] = rhse / lhse;
       dfdphi[j + i * ny] = phi[j + i * ny];
 
