@@ -189,7 +189,7 @@ void Evolve ()
 
   sum = 0.0;
 
- if (count % 1000 == 0){
+ if (count % print_steps == 0){
    for (int i = 0; i < nx; i++) {
      for (int j = 0; j < ny; j++) {
          sum += creal(dfdphi[j+i*ny]);
