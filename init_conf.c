@@ -5,10 +5,11 @@ void Init_Conf()
 FILE *fp;
 char fn[100];
 double *random_num;
-double sum, mean;
 double R_particle;
 R_particle = 50.0;
 double c0 = 0.5, epsi = 0.01;
+
+double sum=0.0, initMean;
 
 random_num = (double*) malloc(sizeof(double) * nx * ny);
 
@@ -19,9 +20,12 @@ for (int i = 0; i < nx; i++) {
        phi[j + i * ny] = 1.0 + _Complex_I * 0.0;
     else
        phi[j + i * ny] = 0.0 + _Complex_I * 0.0;
-    
+       
+      sum += creal(phi[j + i * ny]);
     }
  }
+   printf("initMean = %e\n",initMean);
+
 /*srand(time(NULL));
 sum = 0.0;
  for (int j = 0; j < ny; j++) {
