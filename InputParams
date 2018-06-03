@@ -3,7 +3,7 @@ ny 1024
 dx 1.0
 dy 1.0
 dt 1.0
-numsteps 5000
+numsteps 10000
 print_steps 1000
 A 1.0 B 5.0 chi 0.0 P 1.0
 c_alpha 0.5 c_beta1 0.3 c_beta2 0.7

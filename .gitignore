@@ -73,4 +73,6 @@ Mkfile.old
 conf*
 prof_gp*
 
+kx_ky_data
+
 dkms.conf

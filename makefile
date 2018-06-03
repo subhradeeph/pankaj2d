@@ -1,7 +1,7 @@
 #IDIR =../include
 IDIR =.
 CC=gcc -O3
-CFLAGS=-I$(IDIR) -std=gnu99 -g
+CFLAGS=-I$(IDIR) -std=gnu99 -g 
 
 #ODIR=obj
 ODIR=.
