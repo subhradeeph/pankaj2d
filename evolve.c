@@ -22,15 +22,14 @@ void Evolve ()
 
   double err, maxerror;
   
-  double sum, mean;
+  double sum, mean, gamma;
 
-  fftw_complex *gradphi_x, *gradphi_y, *gradmu_x, *gradmu_y;
+  fftw_complex *gradphi_x, *gradphi_y, *gradmu_x, *gradmu_y, *f;
 
   tempreal = (double *) malloc (sizeof (double) * nx * ny);
+  
   gradphi_x =(fftw_complex*) fftw_malloc(sizeof (fftw_complex) * nx * ny);
   gradphi_y = (fftw_complex*) fftw_malloc(sizeof (fftw_complex) * nx * ny);
-//  gradmu_x = (fftw_complex*) fftw_malloc(sizeof (fftw_complex) * nx * ny);
-//  gradmu_y = (fftw_complex*) fftw_malloc(sizeof (fftw_complex) * nx * ny);
 
   dkx = 2.0 * PI / ((double) nx * dx);
   dky = 2.0 * PI / ((double) ny * dy);
@@ -43,7 +42,6 @@ void Evolve ()
   
   fftw_execute_dft (p_up, comp, comp);
   fftw_execute_dft (p_up, phi, phi);
-
 
   alloycomp = creal(comp[0]) * one_by_nxny;
   printf ("AlloyComposition = %lf\n", alloycomp);
@@ -65,7 +63,6 @@ void Evolve ()
   double ptemp;
   double hphi, gphi, hprime, gprime;
 
-  double gamma = 0.0;
 // Evaluate dfdc in real space
  for (int i = 0; i < nx; i++) {
    for (int j = 0; j < ny; j++) {
@@ -76,8 +73,10 @@ void Evolve ()
 	 hprime = 30.0 * (ptemp * ptemp - 2.0 * ptemp * ptemp * ptemp + ptemp * ptemp * ptemp * ptemp);
 	 gphi = (ptemp * ptemp) * (1.0 - ptemp) * (1.0 - ptemp);
 	 gprime = 2.0 * ptemp - 6.0 * ptemp * ptemp + 4.0 * ptemp * ptemp * ptemp;
+//	 f[j+i*ny] = (1.0-hphi)*A*(ctemp-c_alpha)*(ctemp-c_alpha) + B*hphi*(ctemp-c_beta1)*(ctemp-c_beta1)
+//		     *(ctemp-c_beta2)*(ctemp-c_beta2) + (1.0-chi*ctemp)*P*gphi + _Complex_I * 0.0;
 	
-    if (ptemp > 1.0) {
+	if (ptemp > 1.0) {
 	  hphi = 1.0;
 	  hprime = 0.0;
 	  gphi = 0.0;
@@ -95,18 +94,26 @@ void Evolve ()
 
   dfdphi[j + i * ny] = -1.0 * hprime * A * (ctemp - c_alpha) * (ctemp - c_alpha) + hprime * B * (ctemp - c_beta1) 
 	  * (ctemp - c_beta1) * (ctemp - c_beta2) * (ctemp - c_beta2) + (1.0 - chi * ctemp) * P * gprime + _Complex_I * 0.0;
-     
-        gamma += dfdphi[j + i * ny];
     
      }
     }
-    gamma = gamma * one_by_nxny;
-
-    if (count % print_steps == 0)
-       printf("gamma %e\n",gamma);
 
     fftw_execute_dft (p_up, dfdc, dfdc);
     fftw_execute_dft (p_up, dfdphi, dfdphi);
+    
+    gamma = 0.0;
+    
+    for (int i = 0; i < nx; i++) {
+      for (int j = 0; j < ny; j++) { 
+	gamma += creal(dfdphi[j + i * ny]);
+      }
+    }
+    
+    gamma = gamma * one_by_nxny;
+
+  if (count % print_steps == 0){
+      printf("gamma %e\n",gamma);
+  }
 
  for (int i = 0; i < nx; i++) {
     if (i < nx_half)
