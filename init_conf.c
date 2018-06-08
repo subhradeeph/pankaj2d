@@ -17,21 +17,13 @@ for (int i = 0; i < nx; i++) {
    for (int j = 0; j < ny; j++) {
 	//if ((double) (i - nx/2)*(double)(i - nx/2)  + (double) (j - ny/2) * (double)(j - ny/2)  <= (R_particle)*(R_particle)){
     //if ( (j>=452 && j<552 && i > 501 && i< 522) || (i>=462 && i<562 && j>=551 && j<571)  )
-    if ( (j>=392 && j<592 && i > 492 && i< 532) || (i>=412 && i<612 && j>=591 && j<631)  )
+    if ( (j>=68 && j< 168 && i >= 118 && i< 138) || (i>=78 && i< 178 && j>=167 && j<187)  )
        phi[j + i * ny] = 1.0 + _Complex_I * 0.0;
     else
        phi[j + i * ny] = 0.0 + _Complex_I * 0.0;
        
     }
  }
-for (int i = 0; i < nx; i++) {
-   for (int j = 0; j < ny; j++) {
-      sum += creal(phi[j + i * ny]);
-   }
-}   
-      
-   initMean  = sum * one_by_nxny;
-   printf("initMean = %e\n",initMean);
 
 /*srand(time(NULL));
 sum = 0.0;
@@ -51,14 +43,22 @@ sum = 0.0;
 
  for (int i = 0; i < nx; i++) {
   for (int j = 0; j < ny; j++) { 
-    if ( (j>=392 && j<592 && i > 492 && i< 532) || (i>=412 && i<612 && j>=591 && j<631)  )
-        comp[j + i * ny] = c0 + epsi*(cos(0.105*(i-502)*dx)*cos(0.11*(j-452)*dy) + (cos(0.13*(i-502)*dx)
-			    *cos(0.087*(j-452)*dy))*(cos(0.13*(i-502)*dx)*cos(0.087*(j-452)*dy)) +
-                           cos(0.025*(i-502)*dx - 0.15*(j-452)*dy)*cos(0.07*(i-502)*dx - 0.02*(j-452)*dy) ) + _Complex_I * 0.0;
+    if ( (j>=68 && j< 168 && i >= 118 && i< 138) || (i>=78 && i< 178 && j>=167 && j<187)  )
+        comp[j + i * ny] = c0 + epsi*(cos(0.105*(i-118)*dx)*cos(0.11*(j-68)*dy) + (cos(0.13*(i-118)*dx)
+			    *cos(0.087*(j-68)*dy))*(cos(0.13*(i-118)*dx)*cos(0.087*(j-68)*dy)) +
+                           cos(0.025*(i-118)*dx - 0.15*(j-68)*dy)*cos(0.07*(i-118)*dx - 0.02*(j-68)*dy) ) + _Complex_I * 0.0;
     else 
         comp[j + i * ny] = c_alpha + _Complex_I * 0.0;
   }
  }
+for (int i = 0; i < nx; i++) {
+   for (int j = 0; j < ny; j++) {
+      sum += creal(comp[j + i * ny]);
+   }
+}   
+      
+   initMean  = sum * one_by_nxny;
+   printf("initMean = %e\n",initMean);
 
 for (int i = 0; i < nx; i++) {
  for (int j = 0; j < ny; j++) {

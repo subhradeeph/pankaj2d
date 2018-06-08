@@ -6,15 +6,13 @@ void Evolve ()
 
   int loop_condition, count;
 
-  double dkx, dky, *kx, *ky, *ax, *ay;
-
-  double *Denominator;
+  double dkx, dky, *kx, *ky;
 
   double kpow2, kpow4;
 
   double rc, fp, rc_new;
 
-  double total;
+  double total, LagrangeSum;
 
   double *tempreal;
 
@@ -33,15 +31,9 @@ void Evolve ()
   fftw_complex *gradphi_x, *gradphi_y, *gradmu_x, *gradmu_y, *f;
 
   tempreal = (double *) malloc (sizeof (double) * nx * ny);
-  Denominator = (double *) malloc (sizeof (double) * nx * ny);
   kx = (double *) malloc (sizeof (double) * nx * ny);
   ky = (double *) malloc (sizeof (double) * nx * ny);
-  ax = (double *) malloc (sizeof (double) * nx * ny);
-  ay = (double *) malloc (sizeof (double) * nx * ny);
   
-  gradphi_x =(fftw_complex*) fftw_malloc(sizeof (fftw_complex) * nx * ny);
-  gradphi_y = (fftw_complex*) fftw_malloc(sizeof (fftw_complex) * nx * ny);
-
   dkx = 2.0 * PI / ((double) nx * dx);
   dky = 2.0 * PI / ((double) ny * dy);
 
@@ -52,7 +44,6 @@ void Evolve ()
   loop_condition = 1;
   
   fftw_execute_dft (p_up, comp, comp);
-  fftw_execute_dft (p_up, phi, phi);
 
   alloycomp = creal(comp[0]) * one_by_nxny;
   printf ("AlloyComposition = %lf\n", alloycomp);
@@ -67,35 +58,18 @@ void Evolve ()
        kx[j + i * ny] = 0.0;
     else
        kx[j + i * ny] = (double) (i - nx) * dkx;
-       ax[j + i * ny]= kx[j + i * ny];
 
        kx[j + i * ny] = kx[j + i * ny] * kx[j + i * ny];
     
     if (j < ny_half)
-       ky[j + i * ny] = (double) j *dky;
+       ky[j + i * ny] = (double) j * dky;
     else if (j == ny_half)
        ky[j + i * ny] = 0.0;
     else
        ky[j + i * ny] = (double) (j - ny) * dky;
-       ay[j + i * ny] = ky[j + i * ny];
        ky[j + i * ny] = ky[j + i * ny] * ky[j + i * ny];
   }
  }
-	
- for (int i = 0; i < nx; i++) {
-  for (int j = 0; j < ny; j++) {
-    Denominator[j + i * ny] = /*1.0 / (2.0 * PI * nx*ny);// */  sqrt(kx[j + i * ny] + ky[j + i * ny]);
-  }
- }
-FILE *e;
-e = fopen("Denominator","w");
-  for (int i = 0; i < nx; i++) {
-     for (int j = 0; j < ny; j++) {
-         fprintf(e,"%d\t%d\t%e\n",i ,j, Denominator[j + i * ny]);
-     }
-     fprintf(e,"\n");
-  }
-  fclose(e);
 
   for (count = 0; count <= num_steps; count++) {
 
@@ -113,7 +87,7 @@ e = fopen("Denominator","w");
      for (int j = 0; j < ny; j++) {
 
 	 ctemp = creal(dfdc[j + i * ny]);
-	 ptemp = creal(dfdphi[j + i * ny]);
+	 ptemp = creal(phi[j + i * ny]);
 	 hphi = ptemp * ptemp * ptemp * (10.0 - 15.0 * ptemp + 6.0 * ptemp * ptemp);
 	 hprime = 30.0 * (ptemp * ptemp - 2.0 * ptemp * ptemp * ptemp + ptemp * ptemp * ptemp * ptemp);
 	 gphi = (ptemp * ptemp) * (1.0 - ptemp) * (1.0 - ptemp);
@@ -135,23 +109,23 @@ e = fopen("Denominator","w");
 	dfdc[j + i * ny] = 2.0 * A * (1.0 - hphi) * (ctemp - c_alpha) + 2.0 * B * hphi * (ctemp - c_beta1) 
 		         * (ctemp - c_beta2) * (2.0 * ctemp - c_beta1 - c_beta2) - chi * P * gphi + _Complex_I * 0.0;
 
-  dfdphi[j + i * ny] = -1.0 * hprime * A * (ctemp - c_alpha) * (ctemp - c_alpha) + hprime * B * (ctemp - c_beta1) 
+        dfdphi[j + i * ny] = -1.0 * hprime * A * (ctemp - c_alpha) * (ctemp - c_alpha) + hprime * B * (ctemp - c_beta1) 
 	  * (ctemp - c_beta1) * (ctemp - c_beta2) * (ctemp - c_beta2) + (1.0 - chi * ctemp) * P * gprime + _Complex_I * 0.0;
-    
      }
     }
+    fftw_execute_dft (p_up, phi, phi);
 
     fftw_execute_dft (p_up, dfdc, dfdc);
     fftw_execute_dft (p_up, dfdphi, dfdphi);
+  
+    LagrangeSum = creal(dfdphi[0]) * one_by_nxny;
+
+//printf("LagrangeSum = %e\n",LagrangeSum);
     
-    for (int i = 0; i < nx; i++) {
-      for (int j = 0; j < ny; j++) { 
+   for (int i = 0; i < nx; i++) {
+    for (int j = 0; j < ny; j++) { 
       kpow2 = kx[j + i *ny] + ky[j + i *ny];
       kpow4 = kpow2 * kpow2;
-     //printf("kpow2 = %e\t, kpow4 = %e\n",kpow2,kpow4); 
-      
-      gradphi_x[j + i * ny] = I * ax[j + i * ny] * phi[j + i * ny];
-      gradphi_y[j + i * ny] = I * ay[j + i * ny] * phi[j + i * ny];
       
       lhs = 1.0 + 2.0 * mobility * kappa_c * kpow4 * dt;
 
@@ -160,10 +134,10 @@ e = fopen("Denominator","w");
       dfdc[j + i * ny] = comp[j + i * ny];
 
       lhse = 1.0 + 2.0 * relax_coeff * kappa_phi * kpow2 * dt;
-
-      rhse = phi[j + i * ny] - relax_coeff * dt * dfdphi[j + i * ny]; //*(1.0 + I * Denominator[j + i * ny]);
+      
+      rhse = phi[j + i * ny] - relax_coeff * dt * dfdphi[j + i * ny] ;
       phi[j + i * ny] = rhse / lhse;
-      dfdphi[j + i * ny] = phi[j + i * ny];
+ //     dfdphi[j + i * ny] = phi[j + i * ny];
 
       }
     }
@@ -178,40 +152,31 @@ e = fopen("Denominator","w");
     }
 
     fftw_execute_dft (p_dn, dfdc, dfdc);
-    fftw_execute_dft (p_dn, dfdphi, dfdphi);
-
-    fftw_execute_dft (p_dn, gradphi_x, gradphi_x);
-    fftw_execute_dft (p_dn, gradphi_y, gradphi_y);
-    //fftw_execute_dft (p_dn, gradmu_x, gradmu_x);
-    //fftw_execute_dft (p_dn, gradmu_y, gradmu_y);
+    fftw_execute_dft (p_dn, phi, phi);
 
   for (int i = 0; i < nx; i++) {
     for (int j = 0; j < ny; j++) {
       dfdc[j + i * ny] *= one_by_nxny;
-      dfdphi[j + i * ny] *= one_by_nxny;
-   
-      gradphi_x[j + i * ny] *= one_by_nxny;
-      gradphi_y[j + i * ny] *= one_by_nxny;
-     
-      /*gradmu_x[j + i * ny] *= one_by_nxny;
-      gradmu_y[j + i * ny] *= one_by_nxny;
-   gradmu[j + i *ny] = sqrt(creal(gradmu_x[j+i*ny]) * creal(gradmu_x[j+i*ny]) + creal(gradmu_y[j+i*ny]) * creal(gradmu_y[j+i*ny]) );
-   */
-   gradphi[j + i *ny] = sqrt(creal(gradphi_x[j+i*ny]) *creal(gradphi_x[j+i*ny]) + creal(gradphi_y[j+i*ny]) * creal(gradphi_y[j+i*ny]));
+      phi[j + i * ny] *= one_by_nxny;
+   }
+  }
+
+  for (int i = 0; i < nx; i++) {
+    for (int j = 0; j < ny; j++) {
+	    phi[j + i * ny] = phi[j + i * ny] + LagrangeSum;
     }
   }
 
-  sum = 0.0;
-
+ sum = 0.0;
  if (count % print_steps == 0){
    for (int i = 0; i < nx; i++) {
      for (int j = 0; j < ny; j++) {
-         sum += creal(dfdphi[j+i*ny]);
+         sum += creal(phi[j + i * ny]);
      }
    }
  
    mean = sum * one_by_nxny;
-   printf("mean = %e\n", mean);
+   printf("meanPhi = %e\n", mean);
  }
 
 /* Check for bounds */
@@ -221,11 +186,11 @@ e = fopen("Denominator","w");
          printf ("Compositions out of bounds. Exiting\n");
          exit (0);
       }
-      if (creal(dfdphi[j + i * ny]) < -0.1 || creal(dfdphi[j + i * ny]) > 1.1) {
+/*      if (creal(phi[j + i * ny]) < -0.1 || creal(phi[j + i * ny]) > 1.1) {
          printf ("Phi out of bounds. Exiting\n");
          exit (0);
      }
-   }
+  */ }
  }
 
   /* Check for convergence */
@@ -251,8 +216,4 @@ e = fopen("Denominator","w");
   }
 
 
-  fftw_free(gradmu_x);
-  fftw_free(gradmu_y);
-  fftw_free(gradphi_x);
-  fftw_free(gradphi_y);
 }

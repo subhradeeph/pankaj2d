@@ -34,7 +34,7 @@ fclose(fpt);
 */
 for (int i = 0; i < nx; i++) {
   for (int j = 0; j < ny; j++) {
-    fprintf(fpt,"%d\t%d\t%le\t%le\t%le\n", i, j,creal(dfdc[j + i * ny]), creal(dfdphi[j + i * ny]), gradphi[j+i*ny]);
+    fprintf(fpt,"%d\t%d\t%le\t%le\n", i, j,creal(dfdc[j + i * ny]), creal(phi[j + i * ny]));
   }
   fprintf(fpt,"\n");
 }
